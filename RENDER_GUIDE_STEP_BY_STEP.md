@@ -78,15 +78,16 @@ Vous devez créer **2 services** sur Render :
    - **Value** : `3.11.9`
 4. Cliquez sur **"Save Changes"**
 
-### Méthode 2 : Modifier le Build Command
+### Méthode 2 : Vérifier runtime.txt
 
-1. Dans **Settings** → **Build & Deploy**
-2. Trouvez **"Build Command"**
-3. Remplacez par :
-   ```bash
-   python3.11 -m pip install --upgrade pip && pip install -r requirements.txt
+1. Assurez-vous que `runtime.txt` est à la racine du projet
+2. Contenu doit être exactement :
    ```
-4. Cliquez sur **"Save Changes"**
+   python-3.11.9
+   ```
+3. Pas d'espaces, pas de lignes vides supplémentaires
+
+⚠️ **Ne modifiez PAS le Build Command** - Laissez-le à `pip install -r requirements.txt`
 
 ### Après avoir configuré Python 3.11 :
 
