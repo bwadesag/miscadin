@@ -1,5 +1,5 @@
 """Main Flask application."""
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from backend.config import Config
@@ -38,9 +38,9 @@ def create_app(config_class=Config):
     app.register_blueprint(messages_bp, url_prefix='/api/messages')
     
     # Health check endpoint
-    @app.route('/api/health')
+    @app.route('/api/health', methods=['GET'])
     def health():
-        return {'status': 'ok'}, 200
+        return jsonify({'status': 'ok'}), 200
     
     return app
 
