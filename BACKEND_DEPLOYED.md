@@ -49,9 +49,9 @@ https://miscadin.onrender.com/api/products
 
 Le 404 sur `/` est **normal** - le backend n'a pas de route pour `/`, seulement pour `/api/*`.
 
-## 🗃️ Initialiser la Base de Données
+## 🗃️ Initialiser la Base de Données ⚠️ IMPORTANT
 
-Si vous ne l'avez pas encore fait :
+**Si vous voyez l'erreur `relation "categories" does not exist`, vous devez initialiser la base de données :**
 
 1. Dans votre Web Service Render, allez dans l'onglet **"Shell"**
 2. Cliquez sur **"Open Shell"**
@@ -59,6 +59,10 @@ Si vous ne l'avez pas encore fait :
    ```bash
    python -m backend.init_db
    ```
+4. Attendez que vous voyiez : `[OK] Database initialized successfully!`
+5. Testez à nouveau : `https://miscadin.onrender.com/api/categories`
+
+📖 **Guide détaillé** : Voir `INIT_DATABASE_RENDER.md`
 
 ## 📊 État du Déploiement
 
