@@ -50,8 +50,13 @@ Vous devez créer **2 services** sur Render :
    **Build & Deploy :**
    - **Environment** : `Python 3`
    - **Python Version** : **3.11** (⚠️ IMPORTANT : Ne pas utiliser 3.13)
+     - Si vous ne voyez pas cette option, ajoutez la variable d'environnement :
+       - **Key** : `PYTHON_VERSION`
+       - **Value** : `3.11.9`
    - **Build Command** : `pip install -r requirements.txt`
    - **Start Command** : `python backend/run.py`
+   
+   ⚠️ **CRITIQUE** : Après la création, allez dans **Settings** → **Build & Deploy** et vérifiez que Python Version est bien **3.11**. Si c'est 3.13, changez-le manuellement.
 
    **Plan :**
    - **Plan** : **Free** (sélectionnez le plan gratuit)
