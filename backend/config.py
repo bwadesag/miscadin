@@ -9,11 +9,27 @@ class Config:
     """Application configuration."""
     
     # Database Configuration
-    # Utilise SQLite par défaut (plus simple, pas besoin de serveur)
-    # Pour utiliser MySQL, définissez USE_MYSQL=true dans .env
+    # Priorité : DATABASE_URL (Render) > PostgreSQL > MySQL > SQLite
+    DATABASE_URL = os.getenv('DATABASE_URL')  # Format: postgresql://user:pass@host:port/dbname
+    
+    USE_POSTGRESQL = os.getenv('USE_POSTGRESQL', 'false').lower() == 'true'
     USE_MYSQL = os.getenv('USE_MYSQL', 'false').lower() == 'true'
     
-    if USE_MYSQL:
+    if DATABASE_URL:
+        # Utiliser DATABASE_URL si fourni (Render, Heroku, etc.)
+        # Convertir postgres:// en postgresql:// si nécessaire
+        SQLALCHEMY_DATABASE_URI = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    elif USE_POSTGRESQL:
+        # Configuration PostgreSQL manuelle
+        DB_HOST = os.getenv('DB_HOST', 'localhost')
+        DB_PORT = int(os.getenv('DB_PORT', 5432))
+        DB_USER = os.getenv('DB_USER', 'postgres')
+        DB_PASSWORD = os.getenv('DB_PASSWORD', 'password')
+        DB_NAME = os.getenv('DB_NAME', 'miscadin')
+        SQLALCHEMY_DATABASE_URI = (
+            f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+        )
+    elif USE_MYSQL:
         # Configuration MySQL
         DB_HOST = os.getenv('DB_HOST', 'localhost')
         DB_PORT = int(os.getenv('DB_PORT', 3306))

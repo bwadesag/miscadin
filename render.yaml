@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: miscadin-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python backend/run.py
+    envVars:
+      - key: USE_POSTGRESQL
+        value: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false  # À configurer manuellement avec l'URL du frontend
+
+databases:
+  - name: miscadin-db
+    plan: free
+    databaseName: miscadin
+    user: miscadin_user
+
