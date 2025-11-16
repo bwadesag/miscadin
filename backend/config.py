@@ -17,17 +17,21 @@ class Config:
     
     if DATABASE_URL:
         # Utiliser DATABASE_URL si fourni (Render, Heroku, etc.)
-        # Convertir postgres:// en postgresql:// si nécessaire
-        SQLALCHEMY_DATABASE_URI = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+        # Convertir postgres:// en postgresql+psycopg:// si nécessaire (psycopg3)
+        db_url = DATABASE_URL.replace('postgres://', 'postgresql+psycopg://', 1)
+        # Si déjà postgresql://, remplacer par postgresql+psycopg://
+        if db_url.startswith('postgresql://') and not db_url.startswith('postgresql+psycopg://'):
+            db_url = db_url.replace('postgresql://', 'postgresql+psycopg://', 1)
+        SQLALCHEMY_DATABASE_URI = db_url
     elif USE_POSTGRESQL:
-        # Configuration PostgreSQL manuelle
+        # Configuration PostgreSQL manuelle (utilise psycopg3)
         DB_HOST = os.getenv('DB_HOST', 'localhost')
         DB_PORT = int(os.getenv('DB_PORT', 5432))
         DB_USER = os.getenv('DB_USER', 'postgres')
         DB_PASSWORD = os.getenv('DB_PASSWORD', 'password')
         DB_NAME = os.getenv('DB_NAME', 'miscadin')
         SQLALCHEMY_DATABASE_URI = (
-            f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+            f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
         )
     elif USE_MYSQL:
         # Configuration MySQL
