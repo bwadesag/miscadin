@@ -65,9 +65,40 @@ Vous devez créer **2 services** sur Render :
 
 ---
 
-## ⚙️ ÉTAPE 3 : Configurer les Variables d'Environnement
+## ⚙️ ÉTAPE 3 : Forcer Python 3.11 (IMPORTANT - À FAIRE EN PREMIER)
 
-Une fois le Web Service créé :
+⚠️ **CRITIQUE** : Render utilise Python 3.13 par défaut, ce qui cause des erreurs. Il faut forcer Python 3.11.
+
+### Méthode 1 : Variable d'Environnement (RECOMMANDÉ)
+
+1. Dans votre **Web Service**, allez dans l'onglet **"Environment"**
+2. Cliquez sur **"Add Environment Variable"**
+3. Ajoutez :
+   - **Key** : `PYTHON_VERSION`
+   - **Value** : `3.11.9`
+4. Cliquez sur **"Save Changes"**
+
+### Méthode 2 : Modifier le Build Command
+
+1. Dans **Settings** → **Build & Deploy**
+2. Trouvez **"Build Command"**
+3. Remplacez par :
+   ```bash
+   python3.11 -m pip install --upgrade pip && pip install -r requirements.txt
+   ```
+4. Cliquez sur **"Save Changes"**
+
+### Après avoir configuré Python 3.11 :
+
+1. Allez dans **"Manual Deploy"**
+2. Cliquez sur **"Clear build cache & deploy"**
+3. Vérifiez les logs pour confirmer Python 3.11
+
+---
+
+## ⚙️ ÉTAPE 4 : Configurer les Variables d'Environnement
+
+Une fois Python 3.11 configuré :
 
 ### Option A : Lier Automatiquement la Base de Données (RECOMMANDÉ)
 
@@ -112,7 +143,7 @@ Voir le fichier `.env.render` pour un template complet avec toutes les variables
 
 ---
 
-## 🚀 ÉTAPE 4 : Déploiement Automatique
+## 🚀 ÉTAPE 5 : Déploiement Automatique
 
 1. Render va automatiquement :
    - Installer les dépendances Python
@@ -123,7 +154,7 @@ Voir le fichier `.env.render` pour un template complet avec toutes les variables
 
 ---
 
-## 🗃️ ÉTAPE 5 : Initialiser la Base de Données
+## 🗃️ ÉTAPE 6 : Initialiser la Base de Données
 
 1. Dans votre Web Service, allez dans l'onglet **"Shell"**
 2. Cliquez sur **"Open Shell"**
@@ -138,7 +169,7 @@ Voir le fichier `.env.render` pour un template complet avec toutes les variables
 
 ---
 
-## 🔗 ÉTAPE 6 : Obtenir l'URL du Backend
+## 🔗 ÉTAPE 7 : Obtenir l'URL du Backend
 
 1. Dans votre Web Service, allez dans **"Settings"**
 2. Notez l'URL sous **"Service Details"** → **"URL"**
