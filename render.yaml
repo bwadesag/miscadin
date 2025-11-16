@@ -2,6 +2,7 @@ services:
   - type: web
     name: miscadin-backend
     env: python
+    pythonVersion: "3.11"
     buildCommand: pip install -r requirements.txt
     startCommand: python backend/run.py
     envVars:
@@ -19,4 +20,3 @@ databases:
     plan: free
     databaseName: miscadin
     user: miscadin_user
-

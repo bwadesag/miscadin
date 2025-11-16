@@ -49,6 +49,7 @@ Vous devez créer **2 services** sur Render :
 
    **Build & Deploy :**
    - **Environment** : `Python 3`
+   - **Python Version** : **3.11** (⚠️ IMPORTANT : Ne pas utiliser 3.13)
    - **Build Command** : `pip install -r requirements.txt`
    - **Start Command** : `python backend/run.py`
 
