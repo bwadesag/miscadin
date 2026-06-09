@@ -1,0 +1,35 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-black text-gold-200 font-sans;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gold-600 text-black px-6 py-3 rounded-lg font-semibold hover:bg-gold-500 transition-colors duration-200 shadow-lg shadow-gold-600/50;
+  }
+  
+  .btn-secondary {
+    @apply bg-dark-200 text-gold-200 px-6 py-3 rounded-lg font-semibold hover:bg-dark-300 transition-colors duration-200 border border-gold-600/30;
+  }
+  
+  .card {
+    @apply bg-dark-100 rounded-lg shadow-lg shadow-gold-600/10 overflow-hidden transition-shadow duration-200 hover:shadow-xl hover:shadow-gold-600/20 border border-gold-600/10;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2 bg-dark-200 border border-gold-600/30 text-gold-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 placeholder:text-dark-500;
+  }
+  
+  select.input-field {
+    @apply cursor-pointer;
+  }
+  
+  select.input-field option {
+    @apply bg-dark-100 text-gold-200;
+  }
+}

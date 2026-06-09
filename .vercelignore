@@ -1,0 +1,14 @@
+node_modules
+.env
+.env.local
+.env.production
+backend/
+instance/
+*.db
+*.sqlite
+__pycache__/
+*.pyc
+.git
+.vscode
+.idea
+

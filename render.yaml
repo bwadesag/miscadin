@@ -1,0 +1,29 @@
+# Déploiement gratuit sur Render (sans carte bancaire)
+# Dashboard → New → Blueprint → connecter ce repo
+services:
+  - type: web
+    name: miscadin-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: bash scripts/start.sh
+    healthCheckPath: /api/health
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: USE_MYSQL
+        value: "false"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: miscadin-db
+          property: connectionString
+      - key: CORS_ORIGINS
+        sync: false
+
+databases:
+  - name: miscadin-db
+    plan: free
+    databaseName: miscadin
+    user: miscadin
