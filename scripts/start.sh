@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-echo "Initialisation de la base de données (non bloquante)..."
-python -m backend.init_db || echo "ATTENTION: init_db a echoue, le serveur demarre quand meme."
+echo "Initialisation de la base de donnees (non bloquante)..."
+if ! python -m backend.init_db; then
+  echo "ATTENTION: init_db a echoue, le serveur demarre quand meme."
+  echo "Verifiez que DATABASE_URL est liee a PostgreSQL dans Render > Environment."
+fi
 
 echo "Routes enregistrees :"
 python -c "from wsgi import application; print([str(r) for r in application.url_map.iter_rules()])"

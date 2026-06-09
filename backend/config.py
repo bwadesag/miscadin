@@ -5,6 +5,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def normalize_database_url(url: str) -> str:
+    """Normalise l'URL PostgreSQL pour Render/Heroku."""
+    if url.startswith('postgres://'):
+        url = url.replace('postgres://', 'postgresql://', 1)
+    if url.startswith('postgresql://') and 'sslmode=' not in url:
+        separator = '&' if '?' in url else '?'
+        url = f'{url}{separator}sslmode=require'
+    return url
+
+
 class Config:
     """Application configuration."""
     
@@ -14,10 +24,7 @@ class Config:
     USE_MYSQL = os.getenv('USE_MYSQL', 'false').lower() == 'true'
 
     if DATABASE_URL:
-        # Render/Heroku fournissent postgres:// — SQLAlchemy attend postgresql://
-        if DATABASE_URL.startswith('postgres://'):
-            DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-        SQLALCHEMY_DATABASE_URI = DATABASE_URL
+        SQLALCHEMY_DATABASE_URI = normalize_database_url(DATABASE_URL)
     elif USE_MYSQL:
         # Configuration MySQL
         DB_HOST = os.getenv('DB_HOST', 'localhost')

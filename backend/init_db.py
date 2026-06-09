@@ -1,11 +1,27 @@
 """Initialize database with tables and sample data."""
+import sys
+import traceback
+
 from backend.app import create_app, db
 from backend.models import User, Category, Product
 from backend.config import Config
 
-app = create_app(Config)
 
-with app.app_context():
+def main():
+    app = create_app(Config)
+    db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+    if db_uri.startswith('postgresql'):
+        print('[INFO] Connexion PostgreSQL detectee')
+    elif db_uri.startswith('sqlite'):
+        print('[INFO] Connexion SQLite detectee')
+    else:
+        print('[INFO] Connexion base de donnees personnalisee')
+
+    with app.app_context():
+        _initialize(app)
+
+
+def _initialize(app):
     # Create all tables
     db.create_all()
     
@@ -242,4 +258,14 @@ with app.app_context():
     
     db.session.commit()
     print("\n[OK] Database initialized successfully!")
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as error:
+        print('\n[ERREUR] init_db a echoue:')
+        print(error)
+        traceback.print_exc()
+        sys.exit(1)
 
