@@ -7,7 +7,7 @@ services:
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: bash scripts/start.sh
-    healthCheckPath: /api/health
+    healthCheckPath: /
     envVars:
       - key: SECRET_KEY
         generateValue: true

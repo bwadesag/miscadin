@@ -1,5 +1,5 @@
 """Main Flask application."""
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from backend.config import Config
@@ -39,7 +39,7 @@ def create_app(config_class=Config):
     
     @app.route('/')
     def index():
-        return {
+        return jsonify({
             'name': 'MISCADIN API',
             'status': 'running',
             'health': '/api/health',
@@ -48,12 +48,12 @@ def create_app(config_class=Config):
                 'products': '/api/products',
                 'auth': '/api/auth/login',
             },
-        }, 200
+        }), 200
 
     @app.route('/health')
     @app.route('/api/health')
     def health():
-        return {'status': 'ok'}, 200
+        return jsonify({'status': 'ok'}), 200
 
     return app
 
