@@ -5,7 +5,7 @@ services:
     name: miscadin-api
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python -m backend.init_db || true
     startCommand: bash scripts/start.sh
     healthCheckPath: /
     envVars:
