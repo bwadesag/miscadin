@@ -16,6 +16,7 @@ import { useProductStore } from '../../store/productStore'
 import { Product } from '../../types'
 import toast from 'react-hot-toast'
 import { formatPrice } from '../../utils/currency'
+import AdminPageHeader from '../../components/admin/AdminPageHeader'
 
 const emptyForm = {
   name: '',
@@ -150,34 +151,31 @@ const AdminProducts = () => {
   const featuredCount = products.filter((p) => p.featured).length
   const imagePreviews = formData.images.split(',').map((img) => img.trim()).filter(Boolean)
 
-  if (loading && products.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <Loader2 className="w-8 h-8 text-gold-500 animate-spin mx-auto mb-4" aria-hidden="true" />
-        <p className="text-gold-400">Chargement des produits...</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-        <div>
-          <p className="text-gold-600 text-sm font-semibold uppercase tracking-widest mb-1">Administration</p>
-          <h1 className="text-3xl md:text-4xl font-bold text-gold-400">Gestion des produits</h1>
-          <p className="text-gold-500 mt-2">Ajoutez, modifiez et gérez votre catalogue.</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => handleOpenModal()}
-          className="btn-primary flex items-center justify-center gap-2 min-h-[44px] cursor-pointer shrink-0"
-        >
-          <Plus className="w-5 h-5" aria-hidden="true" />
-          Ajouter un produit
-        </button>
-      </div>
+    <div>
+      <AdminPageHeader
+        title="Produits"
+        description="Ajoutez, modifiez et gérez votre catalogue."
+        action={
+          <button
+            type="button"
+            onClick={() => handleOpenModal()}
+            className="btn-primary flex items-center justify-center gap-2 min-h-[44px] cursor-pointer shrink-0"
+          >
+            <Plus className="w-5 h-5" aria-hidden="true" />
+            Ajouter un produit
+          </button>
+        }
+      />
 
+      <div className="px-4 md:px-8 py-8">
+      {loading && products.length === 0 ? (
+        <div className="py-16 text-center">
+          <Loader2 className="w-8 h-8 text-gold-500 animate-spin mx-auto mb-4" aria-hidden="true" />
+          <p className="text-gold-400">Chargement des produits...</p>
+        </div>
+      ) : (
+        <>
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="card p-5 flex items-center gap-4">
@@ -553,6 +551,9 @@ const AdminProducts = () => {
           </div>
         </div>
       )}
+        </>
+      )}
+      </div>
     </div>
   )
 }

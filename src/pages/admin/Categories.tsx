@@ -1,28 +1,26 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Plus, Trash2, Folder, Edit } from 'lucide-react'
+import { Plus, Trash2, FolderOpen, Edit, X, Loader2, Image as ImageIcon } from 'lucide-react'
 import { useProductStore } from '../../store/productStore'
 import { Category } from '../../types'
 import toast from 'react-hot-toast'
+import AdminPageHeader from '../../components/admin/AdminPageHeader'
+
+const emptyForm = { name: '', slug: '', description: '', image: '' }
 
 const AdminCategories = () => {
-  const { categories, loading, fetchCategories, addCategory, updateCategory, deleteCategory } = useProductStore()
+  const { categories, loading, fetchCategories, addCategory, updateCategory, deleteCategory } =
+    useProductStore()
   const [searchParams, setSearchParams] = useSearchParams()
-  
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
-  const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    description: '',
-    image: '',
-  })
+  const [formData, setFormData] = useState(emptyForm)
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     fetchCategories()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-  
+  }, [fetchCategories])
+
   const handleOpenModal = (category?: Category) => {
     if (category) {
       setEditingCategory(category)
@@ -34,33 +32,28 @@ const AdminCategories = () => {
       })
     } else {
       setEditingCategory(null)
-      setFormData({ name: '', slug: '', description: '', image: '' })
+      setFormData(emptyForm)
     }
     setIsModalOpen(true)
   }
-  
+
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setEditingCategory(null)
-    setFormData({ name: '', slug: '', description: '', image: '' })
+    setFormData(emptyForm)
   }
-  
-  // Ouvrir le modal si on arrive depuis le Dashboard
+
   useEffect(() => {
     if (searchParams.get('new') === 'true' && !isModalOpen) {
       handleOpenModal()
-      setSearchParams({}) // Nettoyer l'URL
+      setSearchParams({})
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
-  
-  const handleOpenModalForNew = () => {
-    handleOpenModal()
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
+    setSubmitting(true)
     try {
       const categoryData = {
         name: formData.name,
@@ -76,118 +69,151 @@ const AdminCategories = () => {
         await addCategory(categoryData)
         toast.success('Catégorie ajoutée')
       }
-      
+
       handleCloseModal()
-      fetchCategories() // Rafraîchir la liste
-    } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de la sauvegarde')
+      fetchCategories()
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erreur lors de la sauvegarde'
+      toast.error(message)
+    } finally {
+      setSubmitting(false)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
-      try {
-        await deleteCategory(id)
-        toast.success('Catégorie supprimée')
-        fetchCategories() // Rafraîchir la liste
-      } catch (error: any) {
-        toast.error(error.message || 'Erreur lors de la suppression')
-      }
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) return
+    try {
+      await deleteCategory(id)
+      toast.success('Catégorie supprimée')
+      fetchCategories()
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erreur lors de la suppression'
+      toast.error(message)
     }
   }
 
   if (loading && categories.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Chargement...</div>
+      <div className="py-16 text-center">
+        <Loader2 className="w-8 h-8 text-gold-500 animate-spin mx-auto mb-4" aria-hidden="true" />
+        <p className="text-gold-400">Chargement des catégories...</p>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold text-gold-400">Gestion des Catégories</h1>
-        <button 
-          onClick={handleOpenModalForNew}
-          className="btn-primary flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Ajouter une catégorie
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {categories.map((category) => (
-          <div key={category.id} className="card p-6">
-              <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                {category.image ? (
-                  <img
-                    src={category.image}
-                    alt={category.name}
-                    className="w-12 h-12 object-cover rounded-lg"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none'
-                      const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement
-                      if (fallback) fallback.style.display = 'block'
-                    }}
-                  />
-                ) : null}
-                <div className={`bg-gold-900/30 border border-gold-600/30 p-3 rounded-lg ${category.image ? 'hidden' : ''}`}>
-                  <Folder className="w-6 h-6 text-gold-500" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg text-gold-200">{category.name}</h3>
-                  <p className="text-sm text-gold-400">{category.slug}</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleOpenModal(category)}
-                  className="p-2 text-gold-500 hover:bg-gold-900/20 rounded transition"
-                  title="Modifier la catégorie"
-                >
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleDelete(category.id)}
-                  className="p-2 text-red-400 hover:bg-red-900/20 rounded transition"
-                  title="Supprimer la catégorie"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            {category.description && (
-              <p className="text-gold-400 text-sm mb-4">{category.description}</p>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Modal */}
-      {isModalOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999]"
-          style={{ zIndex: 9999 }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              handleCloseModal()
-            }
-          }}
-        >
-          <div 
-            className="bg-dark-100 border border-gold-600/30 rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+    <div>
+      <AdminPageHeader
+        title="Catégories"
+        description="Organisez votre catalogue par familles de produits."
+        action={
+          <button
+            type="button"
+            onClick={() => handleOpenModal()}
+            className="btn-primary flex items-center gap-2 min-h-[44px] cursor-pointer"
           >
-            <h2 className="text-2xl font-bold mb-4 text-gold-400">
-              {editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie'}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <Plus className="w-5 h-5" aria-hidden="true" />
+            Ajouter une catégorie
+          </button>
+        }
+      />
+
+      <div className="px-4 md:px-8 py-8">
+        {categories.length === 0 ? (
+          <div className="card p-12 text-center">
+            <FolderOpen className="w-12 h-12 text-gold-600 mx-auto mb-4" aria-hidden="true" />
+            <h2 className="text-xl font-bold text-gold-400 mb-2">Aucune catégorie</h2>
+            <p className="text-gold-500 mb-6">Créez votre première catégorie pour structurer le catalogue.</p>
+            <button type="button" onClick={() => handleOpenModal()} className="btn-primary cursor-pointer">
+              Ajouter une catégorie
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {categories.map((category) => (
+              <article
+                key={category.id}
+                className="card overflow-hidden hover:border-gold-600/30 transition-colors duration-200"
+              >
+                <div className="aspect-[16/9] bg-dark-200 relative overflow-hidden">
+                  {category.image ? (
+                    <img
+                      src={category.image}
+                      alt={category.name}
+                      className="w-full h-full object-cover opacity-90"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none'
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gold-900/20 to-dark-200">
+                      <FolderOpen className="w-10 h-10 text-gold-600" aria-hidden="true" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <h3 className="font-bold text-lg text-gold-200">{category.name}</h3>
+                    <p className="text-xs text-gold-500 font-mono">{category.slug}</p>
+                  </div>
+                </div>
+                <div className="p-4">
+                  {category.description && (
+                    <p className="text-sm text-gold-500 line-clamp-2 mb-4">{category.description}</p>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenModal(category)}
+                      className="btn-secondary flex-1 flex items-center justify-center gap-1.5 text-sm min-h-[44px] cursor-pointer"
+                      aria-label={`Modifier ${category.name}`}
+                    >
+                      <Edit className="w-4 h-4" aria-hidden="true" />
+                      Modifier
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(category.id)}
+                      className="px-4 py-2 rounded-lg border border-red-600/30 text-red-400 hover:bg-red-600/10 min-h-[44px] cursor-pointer"
+                      aria-label={`Supprimer ${category.name}`}
+                    >
+                      <Trash2 className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/80 cursor-pointer"
+            onClick={() => !submitting && handleCloseModal()}
+            aria-label="Fermer"
+          />
+          <div className="relative bg-dark-100 border border-gold-600/20 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[92vh] overflow-y-auto shadow-2xl">
+            <div className="sticky top-0 bg-dark-100 border-b border-gold-600/20 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gold-400">
+                {editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie'}
+              </h2>
+              <button
+                type="button"
+                onClick={() => !submitting && handleCloseModal()}
+                className="p-2 rounded-lg hover:bg-dark-200 min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer"
+                aria-label="Fermer"
+              >
+                <X className="w-5 h-5 text-gold-400" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block font-semibold mb-2 text-gold-200">Nom</label>
+                <label htmlFor="cat-name" className="block text-sm font-medium text-gold-300 mb-2">Nom</label>
                 <input
+                  id="cat-name"
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -196,77 +222,57 @@ const AdminCategories = () => {
                 />
               </div>
               <div>
-                <label className="block font-semibold mb-2 text-gold-200">Slug</label>
+                <label htmlFor="cat-slug" className="block text-sm font-medium text-gold-300 mb-2">Slug</label>
                 <input
+                  id="cat-slug"
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   placeholder="auto-généré si vide"
-                  className="input-field"
+                  className="input-field font-mono text-sm"
                 />
               </div>
               <div>
-                <label className="block font-semibold mb-2 text-gold-200">Description</label>
+                <label htmlFor="cat-desc" className="block text-sm font-medium text-gold-300 mb-2">Description</label>
                 <textarea
+                  id="cat-desc"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="input-field"
+                  className="input-field resize-none"
                   rows={3}
                 />
               </div>
               <div>
-                <label className="block font-semibold mb-2 text-gold-200">Image (URL)</label>
+                <label htmlFor="cat-image" className="block text-sm font-medium text-gold-300 mb-2 flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4" aria-hidden="true" />
+                  Image (URL)
+                </label>
                 <input
-                  type="text"
+                  id="cat-image"
+                  type="url"
                   value={formData.image}
                   onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  placeholder="https://example.com/category-image.jpg"
+                  placeholder="https://..."
                   className="input-field"
                 />
-                <p className="text-sm text-gold-400 mt-1">
-                  Entrez l'URL de l'image de la catégorie
-                </p>
-                {(formData.image || editingCategory?.image) && (
-                  <div className="mt-3">
-                    <p className="text-sm text-gold-300 mb-2">Aperçu de l'image :</p>
-                    <div className="flex gap-4">
-                      {formData.image && (
-                        <div>
-                          <p className="text-xs text-gold-400 mb-1">Nouvelle image :</p>
-                          <img
-                            src={formData.image}
-                            alt="Preview"
-                            className="w-32 h-32 object-cover rounded border border-gold-600/30"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/128'
-                            }}
-                          />
-                        </div>
-                      )}
-                      {editingCategory?.image && editingCategory.image !== formData.image && (
-                        <div>
-                          <p className="text-xs text-gold-400 mb-1">Image actuelle :</p>
-                          <img
-                            src={editingCategory.image}
-                            alt="Current"
-                            className="w-32 h-32 object-cover rounded border border-gold-600/30 opacity-60"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                {formData.image && (
+                  <img
+                    src={formData.image}
+                    alt="Aperçu"
+                    className="mt-3 w-full h-32 object-cover rounded-lg border border-gold-600/20"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/320x128'
+                    }}
+                  />
                 )}
               </div>
-              <div className="flex gap-4">
-                <button type="submit" className="btn-primary flex-1">
-                  {editingCategory ? 'Modifier' : 'Créer'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="btn-secondary flex-1"
-                >
+              <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+                <button type="button" onClick={handleCloseModal} disabled={submitting} className="btn-secondary flex-1 min-h-[44px] cursor-pointer">
                   Annuler
+                </button>
+                <button type="submit" disabled={submitting} className="btn-primary flex-1 min-h-[44px] flex items-center justify-center gap-2 cursor-pointer">
+                  {submitting && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+                  {editingCategory ? 'Mettre à jour' : 'Créer'}
                 </button>
               </div>
             </form>
@@ -278,4 +284,3 @@ const AdminCategories = () => {
 }
 
 export default AdminCategories
-
